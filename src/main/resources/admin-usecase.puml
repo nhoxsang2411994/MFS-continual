@@ -1,0 +1,24 @@
+@startuml
+title
+ <u>Admin usecase</u>
+end title
+usecase UC1 as "Create an user(s)"
+usecase UC2 as "Update an user(s)"
+usecase UC3 as "Read an user(s)"
+usecase UC4 as "Delete an user(s)"
+usecase UC5 as "View information of
+each user from dashboard
+--
+e.g., total uploaded files,
+removed files, etc."
+usecase UC6 as "Downgrade level of an user(s)"
+usecase UC7 as "Upgrade level of an user(s)"
+
+Admin -up-> UC1
+Admin -left-> UC2
+Admin -right-> UC3
+Admin -down-> UC4
+Admin -up-> UC5
+Admin -down-> UC6
+Admin -down-> UC7
+@enduml

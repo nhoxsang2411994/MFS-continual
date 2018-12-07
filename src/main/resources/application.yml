@@ -1,0 +1,23 @@
+spring:
+  jpa.properties.hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+  datasource:
+    #FullTextEntityManager
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mfs?useUnicode=yes&characterEncoding=UTF-8
+    username: root
+    password: root
+    hibernate:
+      ddl-auto: update
+      show_sql: true
+      jdbc.fetch_size: 100
+
+      # Specify the Lucene Directory
+      search.default.directory_provider: filesystem
+      # Using the filesystem DirectoryProvider you also have to specify the default
+      # base directory for all indexes
+      search.default.indexBase: indexpath
+
+
+
+
+  jackson.serialization.WRITE_DATES_AS_TIMESTAMPS: false

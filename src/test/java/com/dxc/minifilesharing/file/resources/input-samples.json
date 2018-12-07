@@ -1,0 +1,12 @@
+{
+  "fileName" : "A simple story",
+  "uploaderId" : "adfsw",
+  "size" : 1000,
+  "category" : "text",
+  "fileId" : "ashdf",
+  "comments" : [
+    "This is a good book.",
+    "This is heart-warming book."
+  ],
+  "path": "localhost:8080/users/silver/folders/"
+}

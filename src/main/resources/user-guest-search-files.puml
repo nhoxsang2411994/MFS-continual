@@ -1,0 +1,16 @@
+@startuml
+title
+ <u>General Search Files</u>
+end title
+
+Swagger -> V1Delegate: Search Request
+V1Delegate -> UserService: Verify Request
+UserService -> V1Delegate: Verify Completed
+V1Delegate -> FileService: Search Request
+FileService -> FileRepository: Search Request
+FileRepository -> Database: Query
+Database --> FileRepository: Results
+FileRepository --> FileService: Results
+FileService --> V1Delegate: Results
+V1Delegate --> Swagger: Results
+@enduml

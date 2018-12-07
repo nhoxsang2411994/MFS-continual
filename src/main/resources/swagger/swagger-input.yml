@@ -1,0 +1,397 @@
+swagger: "2.0"
+info:
+  description: >-
+    A mini file sharing CRUD adapter.
+  version: 1.0.0
+  title: Mini File Sharing
+host: localhost
+basePath: /v1
+tags:
+- name: Registered User
+  description: CRUD operations for registered users
+schemes:
+- https
+- http
+produces:
+# - application/octet-stream
+- application/json
+- application/pdf
+- application/zip
+- application/vnd.openxmlformats-officedocument.wordprocessingml.document
+- application/vnd.oasis.opendocument.text
+- image/png
+- image/gif
+- image/jpeg
+- video/mpeg
+- audio/mpeg
+- audio/ogg
+- text/plain
+paths:
+  '/v1/users/files/':
+    post:
+      tags:
+      - Registered User
+      summary: Upload a file
+      description: Allow users to upload a file.
+      operationId: upFile
+      consumes:
+      - multipart/form-data
+      - application/json
+      parameters:
+      - in: formData
+        name: file
+        type: file
+        required: true
+        description: The file to upload.
+      - in: formData
+        name: userId
+        type: string
+        format: uuid
+        required: true
+        description: the uploader's id.
+      responses:
+        '200':
+          description:  Uploaded done.
+          schema:
+            type: string
+            format: uuid
+        '404':
+          description: No files with the provided file name found
+        '500':
+          description: Internal Server Error
+  '/v1/users/files/filenames/{fileName}/':
+    get:
+      tags:
+      - Registered User
+      summary: Retrieves files by file's name
+      description: Retrieves files by a file name
+      operationId: readFilesByFileNames
+      parameters:
+      - in: path
+        name: fileName
+        type: string
+        description: 1 - 100 letters file name
+        required: true
+      responses:
+        '200':
+          description: Files to download.
+          schema:
+            type: array
+            items:
+              type: string
+              format: binary
+        '404':
+          description: No files with the provided file name found
+        '500':
+          description: Internal Server Error
+  '/v1/users/files/categories/{category}':
+    get:
+      tags:
+      - Registered User
+      summary: Retrieves file details by one category
+      description: Retrieves files by one category
+      operationId: readFilesByCategory
+      parameters:
+      - in: path
+        name: category
+        required: true
+        type: string
+        enum:
+        - ARCHIVE
+        - AUDIO
+        - IMAGE
+        - TEXT
+        - VIDEO
+        - UNCLASSIFIED
+      produces:
+      - application/json
+      responses:
+        '200':
+          description:  A list of files.
+          schema:
+            type: array
+            items:
+              type: string
+              format: binary
+        '404':
+          description: No files with the provided category found
+        '500':
+          description: Internal Server Error
+  '/v1/users/files/categories/bulk':
+    get:
+      tags:
+      - Registered User
+      summary: Retrieves files by multiple categories
+      description: Retrieves files that belong to a list of categories (one file can only belong to one category).
+      operationId: readFilesByMultiCategories
+      parameters:
+      - name: categories
+        in: body
+        description: 2 - 20 letters list of categories
+        required: true
+        schema:
+          type: array
+          items:
+            $ref: "#/definitions/Category"
+      produces:
+      - application/json
+      responses:
+        '200':
+          description:  A list of files.
+          schema:
+            type: array
+            items:
+              type: string
+              format: binary
+        '404':
+          description: No files with provided categories found
+        '500':
+          description: Internal Server Error
+  # '/v1/users/{userId}/files/':
+  #   get:
+  #     tags:
+  #     - Registered User
+  #     summary: Retrieves files by user's id
+  #     description: Retrieves files by userId.
+  #     operationId: readFilesByUserId
+  #     parameters:
+  #     - in: path
+  #       name: userId
+  #       type: string
+  #       description: The id of one uploader. Example '236636a1-0169-caa8-08c4-d30b1a890613'
+  #       required: true
+  #     produces:
+  #     - application/json
+  #     responses:
+  #       '200':
+  #         description:  A list of files.
+  #         schema:
+  #           type: array
+  #           items:
+  #             type: string
+  #             format: binary
+  #       '404':
+  #         description: No files with provided categories found
+  #       '500':
+  #         description: Internal Server Error
+  '/v1/users/username/{username}/files':
+    get:
+      tags:
+      - Registered User
+      summary: Retrieves files by username
+      description: Retrieves files of files uploaded by an user with the given username.
+      operationId: readFilesByUsername
+      parameters:
+      - in: path
+        name: username
+        type: string
+        minLength: 3
+        maxLength: 15
+        required: true
+        pattern: "^[\\w\\- ]+$"
+        description: The retrieved file informations belong to files uploaded by an user with this username.
+      produces:
+      - application/json
+      responses:
+        '200':
+          description:  A list of files.
+          schema:
+            type: array
+            items:
+              type: string
+              format: binary
+        '404':
+          description: No files with given username found
+        '500':
+          description: Internal Server Error
+  '/v1/users/files/sizes/{size}/':
+    get:
+      tags:
+      - Registered User
+      summary: Retrieves files by size
+      description: Retrieves files of files that are smaller than or as large as the given size.
+      operationId: readFilesBySize
+      parameters:
+      - in: path
+        name: size
+        type: integer
+        # minimun: 1
+        # maximum: 20480
+        required: true
+        description: The size of files, in kilobytes.
+      produces:
+      - application/json
+      responses:
+        '200':
+          description:  A list of files.
+          schema:
+            type: array
+            items:
+              type: string
+              format: binary
+        '404':
+          description: No files with given size found
+        '500':
+          description: Internal Server Error
+  '/v1/users/files/info/{fileId}':
+    get:
+      tags:
+      - Registered User
+      summary: Retrieves file details by file's id
+      description: Retrieves file information of an uploaded file (with comments.)
+      operationId: readFileInfo
+      parameters:
+      - in: path
+        name: fileId
+        type: string
+        format: uuid
+        required: true
+        description: The id of the uploaded file from which has the information needs to be retrieved.
+      produces:
+      - application/json
+      responses:
+        '200':
+          description:  Retrieved information successfully.
+          schema:
+            $ref: "#/definitions/File"
+        '404':
+          description: No files with given size found
+        '500':
+          description: Internal Server Error
+definitions:
+  File:
+    type: object
+    properties:
+      fileId:
+        type: string
+        format: uuid
+        readOnly: true
+        description: The file's id.
+      fileName:
+        type: string
+        minLength: 1
+        maxLength: 100
+        pattern: "^[\\w\\-. ]+$"
+        description: The name of the file, e.g., 'text.txt'.
+      size:
+        type: integer
+        # nullable: false # not supported in Swagger 2.0
+        minimum: 1
+        maximum: 20480
+        readOnly: true
+        description: The file's size, in kilobytes.
+      # uploadedPath:
+      #   type: string
+      #   description: The location where the file is stored.
+      fileCategory:
+        $ref: '#/definitions/FileCategory'
+      userComments:
+        type: array
+        description: Many users can make comments on a file. Can be obmitted.
+        items:
+          $ref: '#/definitions/Comment'
+      uploader:
+        $ref: '#/definitions/User'
+    required:
+    - fileName
+    - uploader
+  Comment:
+    type: object
+    properties:
+      commentId:
+        type: string
+        format: uuid
+        readOnly: true
+        description: The id of the comment.
+      comment:
+        type: string
+        minLength: 20
+        maxLength: 200
+        description: the comment of user.
+    required:
+    - comment
+  FileCategory:
+    type: object
+    properties:
+      id:
+        type: string
+        format: uuid
+        readOnly: true
+        description: The id of categories.
+      name:
+        $ref: '#/definitions/Category'
+  Category:
+    enum:
+    - ARCHIVE
+    - AUDIO
+    - IMAGE
+    - TEXT
+    - VIDEO
+    - UNCLASSIFIED
+    description: >
+      File categories:
+       * ARCHIVE - Archives, e.g., zip, rar, 7z.
+       * AUDIO - Audio files, e.g., mp3, ogg, flac, wav.
+       * IMAGE - Images, e.g., png, jpeg, gif, jpg.
+       * TEXT - Text files, e.g., txt, doc, docx, json, pdf, epub.
+       * VIDEO - Videos, e.g., mp4, wmv, mov, avi, flv.
+       * UNCATEGORIZED - Uncategorized files.
+  User:
+    type: object
+    properties:
+      userId:
+        type: string
+        format: uuid
+        readOnly: true
+        description: The id of the user.
+      username:
+        type: string
+        minLength: 3
+        maxLength: 15
+        pattern: "^[\\w\\- ]+$"
+        description: The name that will be used to display on the website.
+      firstName:
+        type: string
+        minLength: 0
+        maxLength: 50
+        description: The first name of the user. Can be obmitted.
+      lastName:
+        type: string
+        minLength: 0
+        maxLength: 50
+        description: The last name of the user. Can be obmitted.
+      userComments:
+        type: array
+        description: The user can make comments on many files. Can be obmitted.
+        items:
+          $ref: '#/definitions/Comment'
+      email:
+        type: string
+        format: email
+        description: The user's email.
+      phone:
+        type: string
+        description: The user's phone number. Can be obmitted.
+      accountLevel:
+        $ref: '#/definitions/AccountLevel'
+    required:
+    - username
+    - email
+    - accountLevel
+  AccountLevel:
+    type: object
+    properties:
+      accountLevelId:
+        type: string
+        format: uuid
+        readOnly: true
+      accountLevel:
+        description: >
+          * BRONZE - Can upload 5 MB per file. Can download up to 50 MB per day.
+          * SILVER - Can upload 10 MB per file. Can download 70 MB per day.
+          * GOLD - Can upload 20 MB per file. No limits.
+        readOnly: true
+        enum:
+        - BRONZE
+        - SILVER
+        - GOLD

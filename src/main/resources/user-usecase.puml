@@ -1,0 +1,39 @@
+@startuml
+title
+ <u>User and Guest Usecases</u>
+end title
+usecase UC5 as "View info of
+an uploaded files
+(with comments)"
+usecase UC1 as "Search files by name"
+usecase UC2 as "Search files by category"
+usecase UC3 as "Search files by uploader"
+usecase UC4 as "Search files by size"
+usecase UC6 as "Upload file
+with limitation
+of file size according
+to account level"
+usecase UC7 as "Comment on a file"
+usecase UC8 as "Download a file
+from MFS with limitation
+of file size according
+to account level"
+usecase UC9 as "CRUD files uploaded
+by him/herself"
+
+User -up-> UC1
+User -up-> UC2
+User -down-> UC3
+User -down-> UC4
+User -left-> UC5
+User -right-> UC6
+User -up-> UC7
+User -down-> UC8
+User -down-> UC9
+
+Guest -up-> UC1
+Guest -up-> UC2
+Guest -down-> UC3
+Guest -down-> UC4
+Guest -right-> UC5
+@enduml

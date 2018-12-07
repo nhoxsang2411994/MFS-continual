@@ -1,0 +1,22 @@
+@startuml
+title
+ <u>Admin View User Information</u>
+end title
+
+Swagger -> V1Delegate: View Information Request
+V1Delegate -> UserService: View Information Request
+UserService -> UserRepository: Verify request (userId)
+UserRepository -> UserDatabase: Query (userId)
+UserDatabase --> UserRepository: Result
+UserRepository --> UserService: Result
+
+UserService -> FileService: Read Information Request(fileId)
+FileService -> FileRepository: Read Information Request(fileId)
+FileRepository -> FileDatabase: Query
+FileDatabase --> FileRepository: Results
+FileRepository --> FileService: Results
+FileService --> UserService: Results
+UserService --> UserService: Combine Information
+UserService --> V1Delegate: Combined Results
+V1Delegate --> Swagger: Combined Results
+@enduml
