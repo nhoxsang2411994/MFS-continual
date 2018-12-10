@@ -1,0 +1,39 @@
+@startuml
+
+interface "Backend for Frontend" as BFF
+
+package user.service {
+    [User Service] as u
+}
+
+package file.service {
+    [File Service] as f
+}
+
+database "user" {
+    [User]
+    [Account Level]
+}
+
+database "file" {
+    [File]
+    [Comment]
+}
+
+u -up-> [User]
+
+f -up-> [File]
+f -up-> [Comment]
+
+f <-down- BFF
+BFF <-down- u : Request uploaded files info
+u -up-> BFF : Request delete file(s)
+
+f -> BFF : Request upgrade level
+f -> BFF : Request account level
+BFF -left-> u
+
+
+[Comment] -up-> [File] : 1..n
+[User] -up-> [Account Level]: 1..n
+@enduml

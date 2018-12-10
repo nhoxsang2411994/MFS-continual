@@ -13,7 +13,7 @@ schemes:
 - https
 - http
 produces:
-# - application/octet-stream
+- application/octet-stream
 - application/json
 - application/pdf
 - application/zip
@@ -335,7 +335,7 @@ definitions:
        * IMAGE - Images, e.g., png, jpeg, gif, jpg.
        * TEXT - Text files, e.g., txt, doc, docx, json, pdf, epub.
        * VIDEO - Videos, e.g., mp4, wmv, mov, avi, flv.
-       * UNCATEGORIZED - Uncategorized files.
+       * UNCLASSIFIED - unclassified files.
   User:
     type: object
     properties:
@@ -385,12 +385,11 @@ definitions:
         type: string
         format: uuid
         readOnly: true
-      accountLevel:
+      accountLevelName:
         description: >
           * BRONZE - Can upload 5 MB per file. Can download up to 50 MB per day.
           * SILVER - Can upload 10 MB per file. Can download 70 MB per day.
           * GOLD - Can upload 20 MB per file. No limits.
-        readOnly: true
         enum:
         - BRONZE
         - SILVER

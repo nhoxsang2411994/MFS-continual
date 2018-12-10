@@ -21,9 +21,9 @@ public class CommentEntity {
     @PrimaryKeyJoinColumn
     private FileEntity file;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @PrimaryKeyJoinColumn
-    private UserEntity user;
+    @Size(min = 1, max = 36)
+    @Column(name = "USER_ID", nullable = false, length = 36)
+    private String userId;
 
     @Column(name = "DELETED", nullable = false)
     private boolean deleted;
@@ -69,12 +69,12 @@ public class CommentEntity {
         this.file = file;
     }
 
-    public UserEntity getUser() {
-        return user;
+    public String getUserId() {
+        return userId;
     }
 
-    public void setUser(UserEntity user) {
-        this.user = user;
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public boolean isDeleted() {
@@ -106,8 +106,8 @@ public class CommentEntity {
         return "CommentEntity{" +
                 "id=" + id +
                 ", commentId='" + commentId + '\'' +
-                ", file=LAZY" +
-                ", file=LAZY" +
+                ", file=" + file +
+                ", userId='" + userId + '\'' +
                 ", deleted=" + deleted +
                 ", createDate=" + createDate +
                 ", modifiedDate=" + modifiedDate +

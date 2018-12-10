@@ -36,8 +36,8 @@ public class FileEntity {
 
     // TODO (if possible) store userComments as HTMLs or something
     // Micro-service approach: cut the links between loosely coupled entities
-//    @OneToMany(fetch = FetchType.LAZY, mappedBy = "file")
-//    private List<CommentEntity> userComments;
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "file")
+    private List<CommentEntity> userComments;
 
     // TODO validate file's path
     @Column(name = "PATH")
@@ -119,6 +119,30 @@ public class FileEntity {
 
     public void setModifiedDate(Date modifiedDate) {
         this.modifiedDate = modifiedDate;
+    }
+
+    public List<CommentEntity> getUserComments() {
+        return userComments;
+    }
+
+    public void setUserComments(List<CommentEntity> userComments) {
+        this.userComments = userComments;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        this.deleted = deleted;
     }
 
     @Override
