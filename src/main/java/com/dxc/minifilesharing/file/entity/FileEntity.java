@@ -21,6 +21,10 @@ public class FileEntity {
     @Column(name = "FILE_ID", nullable = false, unique = true, length = 36)
     private String fileId;
 
+    @Size(min = 1, max = 36)
+    @Column(name = "UPLOADER_ID", nullable = false, length = 36)
+    private String uploaderId;
+
     //TODO validate file name, exclude special symbols, prevent duplicate file names
     @Size(min = 1, max = 100)
     @Column(name = "FILE_NAME", nullable = false)
@@ -121,6 +125,14 @@ public class FileEntity {
         this.modifiedDate = modifiedDate;
     }
 
+    public String getUploaderId() {
+        return uploaderId;
+    }
+
+    public void setUploaderId(String uploaderId) {
+        this.uploaderId = uploaderId;
+    }
+
     public List<CommentEntity> getUserComments() {
         return userComments;
     }
@@ -150,10 +162,12 @@ public class FileEntity {
         return "FileEntity{" +
                 "id=" + id +
                 ", fileId='" + fileId + '\'' +
+                ", uploaderId='" + uploaderId + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", size=" + size +
                 ", category=" + category +
-                ", userComments=LAZY" +
+                ", userComments=" + userComments +
+                ", path='" + path + '\'' +
                 ", deleted=" + deleted +
                 ", createDate=" + createDate +
                 ", modifiedDate=" + modifiedDate +

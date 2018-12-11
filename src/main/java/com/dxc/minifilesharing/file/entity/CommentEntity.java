@@ -107,7 +107,7 @@ public class CommentEntity {
                 "id=" + id +
                 ", commentId='" + commentId + '\'' +
                 ", file=" + file +
-                ", userId='" + userId + '\'' +
+                ", userId='LAZY" + '\'' +
                 ", deleted=" + deleted +
                 ", createDate=" + createDate +
                 ", modifiedDate=" + modifiedDate +

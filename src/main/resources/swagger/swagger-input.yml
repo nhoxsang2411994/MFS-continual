@@ -12,6 +12,20 @@ tags:
 schemes:
 - https
 - http
+consumes:
+- application/octet-stream
+- application/json
+- application/pdf
+- application/zip
+- application/vnd.openxmlformats-officedocument.wordprocessingml.document
+- application/vnd.oasis.opendocument.text
+- image/png
+- image/gif
+- image/jpeg
+- video/mpeg
+- audio/mpeg
+- audio/ogg
+- text/plain
 produces:
 - application/octet-stream
 - application/json
@@ -27,7 +41,7 @@ produces:
 - audio/ogg
 - text/plain
 paths:
-  '/v1/users/files/':
+  '/v1/users/{userId}/files/':
     post:
       tags:
       - Registered User
@@ -36,14 +50,15 @@ paths:
       operationId: upFile
       consumes:
       - multipart/form-data
+      produces:
       - application/json
       parameters:
       - in: formData
-        name: file
+        name: upfile
         type: file
         required: true
         description: The file to upload.
-      - in: formData
+      - in: path
         name: userId
         type: string
         format: uuid
@@ -57,6 +72,43 @@ paths:
             format: uuid
         '404':
           description: No files with the provided file name found
+        '500':
+          description: Internal Server Error
+  '/v1/users/{userId}/files/{fileId}':
+    post:
+      tags:
+      - Registered User
+      summary: Post a comment
+      description: Allow users to post a comment on a file.
+      operationId: postComment
+      consumes:
+      - text/plain; charset=utf-8
+      parameters:
+      - in: path
+        name: userId
+        type: string
+        format: uuid
+        description: The user id.
+        required: true
+      - in: path
+        name: fileId
+        description: The file id.
+        type: string
+        format: uuid
+        required: true
+      - in: body
+        name: comment
+        description: The content of the comment
+        schema:
+          $ref: '#/definitions/Comment'
+      responses:
+        '200':
+          description:  Comment posted successfully.
+          schema:
+            type: string
+            format: uuid
+        '404':
+          description: No files or users with the provided ids found
         '500':
           description: Internal Server Error
   '/v1/users/files/filenames/{fileName}/':
@@ -217,6 +269,7 @@ paths:
         type: integer
         # minimun: 1
         # maximum: 20480
+        format: int32
         required: true
         description: The size of files, in kilobytes.
       produces:
@@ -276,8 +329,9 @@ definitions:
       size:
         type: integer
         # nullable: false # not supported in Swagger 2.0
-        minimum: 1
-        maximum: 20480
+        # minimum: 1
+        # maximum: 20480
+        format: int32
         readOnly: true
         description: The file's size, in kilobytes.
       # uploadedPath:
@@ -298,11 +352,13 @@ definitions:
   Comment:
     type: object
     properties:
-      commentId:
+      username:
         type: string
-        format: uuid
+        minLength: 3
+        maxLength: 15
+        pattern: "^[\\w\\- ]+$"
+        description: The name that will be used to display on the website.
         readOnly: true
-        description: The id of the comment.
       comment:
         type: string
         minLength: 20
@@ -321,6 +377,7 @@ definitions:
       name:
         $ref: '#/definitions/Category'
   Category:
+    type: string
     enum:
     - ARCHIVE
     - AUDIO
@@ -330,7 +387,7 @@ definitions:
     - UNCLASSIFIED
     description: >
       File categories:
-       * ARCHIVE - Archives, e.g., zip, rar, 7z.
+       * ARCHIVE - Archives, e.g., zip, rar.
        * AUDIO - Audio files, e.g., mp3, ogg, flac, wav.
        * IMAGE - Images, e.g., png, jpeg, gif, jpg.
        * TEXT - Text files, e.g., txt, doc, docx, json, pdf, epub.
@@ -350,47 +407,23 @@ definitions:
         maxLength: 15
         pattern: "^[\\w\\- ]+$"
         description: The name that will be used to display on the website.
-      firstName:
-        type: string
-        minLength: 0
-        maxLength: 50
-        description: The first name of the user. Can be obmitted.
-      lastName:
-        type: string
-        minLength: 0
-        maxLength: 50
-        description: The last name of the user. Can be obmitted.
-      userComments:
-        type: array
-        description: The user can make comments on many files. Can be obmitted.
-        items:
-          $ref: '#/definitions/Comment'
-      email:
-        type: string
-        format: email
-        description: The user's email.
-      phone:
-        type: string
-        description: The user's phone number. Can be obmitted.
-      accountLevel:
-        $ref: '#/definitions/AccountLevel'
     required:
     - username
     - email
     - accountLevel
-  AccountLevel:
-    type: object
-    properties:
-      accountLevelId:
-        type: string
-        format: uuid
-        readOnly: true
-      accountLevelName:
-        description: >
-          * BRONZE - Can upload 5 MB per file. Can download up to 50 MB per day.
-          * SILVER - Can upload 10 MB per file. Can download 70 MB per day.
-          * GOLD - Can upload 20 MB per file. No limits.
-        enum:
-        - BRONZE
-        - SILVER
-        - GOLD
+  # AccountLevel:
+  #   type: object
+  #   properties:
+  #     accountLevelId:
+  #       type: string
+  #       format: uuid
+  #       readOnly: true
+  #     accountLevelName:
+  #       description: >
+  #         * BRONZE - Can upload 5 MB per file. Can download up to 50 MB per day.
+  #         * SILVER - Can upload 10 MB per file. Can download 70 MB per day.
+  #         * GOLD - Can upload 20 MB per file. No limits.
+  #       enum:
+  #       - BRONZE
+  #       - SILVER
+  #       - GOLD

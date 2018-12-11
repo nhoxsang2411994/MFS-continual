@@ -1,23 +1,28 @@
 spring:
-  jpa.properties.hibernate.dialect: org.hibernate.dialect.MySQL5InnoDBDialect
   datasource:
     #FullTextEntityManager
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://localhost:3306/mfs?useUnicode=yes&characterEncoding=UTF-8
     username: root
     password: root
+  jpa:
     hibernate:
       ddl-auto: update
-      show_sql: true
-      jdbc.fetch_size: 100
-
-      # Specify the Lucene Directory
-      search.default.directory_provider: filesystem
-      # Using the filesystem DirectoryProvider you also have to specify the default
-      # base directory for all indexes
-      search.default.indexBase: indexpath
-
-
+      show_sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5Dialect
 
 
   jackson.serialization.WRITE_DATES_AS_TIMESTAMPS: false
+# spring.servlet.multipart.max-file-size is set to 20MB, meaning total file size cannot exceed 20MB
+spring.servlet.multipart.max-file-size: 20MB
+# spring.servlet.multipart.max-request-size: is set to 128KB, meaning total request size for a
+# multipart/form-data cannot exceed 128KB
+spring.servlet.multipart.max-request-size: 128KB
+# By default, Spring features a MultipartResolver that we'll need to disable to use this library.
+# Otherwise, it'll read the content of the request before it reaches our Controller.
+spring.http.multipart.enabled: false
+
+# Custom properties
+storage.location: webapp//upload//
