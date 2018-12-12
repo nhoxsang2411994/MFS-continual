@@ -17,13 +17,21 @@ public class CommentEntity {
     @Column(name = "COMMENT_ID", nullable = false, unique = true, length = 36)
     private String commentId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
     private FileEntity file;
 
     @Size(min = 1, max = 36)
-    @Column(name = "USER_ID", nullable = false, length = 36)
-    private String userId;
+    @Column(name = "COMMENTATOR_ID", nullable = false, length = 36)
+    private String commentatorId;
+
+    @Size(min = 3, max = 15)
+    @Column(name = "USERNAME", nullable = false, length = 15)
+    private String username;
+
+    @Size(min = 20, max = 200)
+    @Column(name = "COMMENT_CONTENT", nullable = false, length = 200)
+    private String commentContent;
 
     @Column(name = "DELETED", nullable = false)
     private boolean deleted;
@@ -69,12 +77,12 @@ public class CommentEntity {
         this.file = file;
     }
 
-    public String getUserId() {
-        return userId;
+    public String getCommentatorId() {
+        return commentatorId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public void setCommentatorId(String commentatorId) {
+        this.commentatorId = commentatorId;
     }
 
     public boolean isDeleted() {
@@ -101,13 +109,33 @@ public class CommentEntity {
         this.modifiedDate = modifiedDate;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getCommentContent() {
+        return commentContent;
+    }
+
+    public void setCommentContent(String commentContent) {
+        this.commentContent = commentContent;
+    }
+
+
+
     @Override
     public String toString() {
         return "CommentEntity{" +
                 "id=" + id +
                 ", commentId='" + commentId + '\'' +
-                ", file=" + file +
-                ", userId='LAZY" + '\'' +
+                ", file=LAZY" +
+                ", commentatorId='" + commentatorId + '\'' +
+                ", username='" + username + '\'' +
+                ", commentContent='" + commentContent + '\'' +
                 ", deleted=" + deleted +
                 ", createDate=" + createDate +
                 ", modifiedDate=" + modifiedDate +

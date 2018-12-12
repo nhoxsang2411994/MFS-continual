@@ -25,8 +25,8 @@ public class V1ApiDelegateImp implements V1ApiDelegate {
 
 
     @Override
-    public ResponseEntity<UUID> postComment(UUID userId, UUID fileId, Comment comment) {
-        return null;
+    public ResponseEntity<UUID> postComment(UUID userId, UUID fileId, String username, Comment comment) {
+        return ResponseEntity.ok(fileService.postComment(userId, fileId, username, comment));
     }
 
     @Override
@@ -61,8 +61,9 @@ public class V1ApiDelegateImp implements V1ApiDelegate {
     }
 
     @Override
-    public ResponseEntity<UUID> upFile(MultipartFile file, UUID userId) {
-        LOGGER.info("OKE");
-        return ResponseEntity.ok(fileService.upFile(file, userId));
+    public ResponseEntity<UUID> upFile(MultipartFile upfile, Integer maxUpSize, UUID userId) {
+        return ResponseEntity.ok(fileService.upFile(upfile, userId, maxUpSize));
     }
+
+
 }

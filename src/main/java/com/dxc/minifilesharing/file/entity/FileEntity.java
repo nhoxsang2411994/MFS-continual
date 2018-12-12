@@ -25,14 +25,14 @@ public class FileEntity {
     @Column(name = "UPLOADER_ID", nullable = false, length = 36)
     private String uploaderId;
 
-    //TODO validate file name, exclude special symbols, prevent duplicate file names
+    //TODO validate file name, exclude special symbols
     @Size(min = 1, max = 100)
     @Column(name = "FILE_NAME", nullable = false)
     private String fileName;
 
     //TODO validate file's size depending on account level
     @Column(name = "SIZE", nullable = false)
-    private int size;
+    private long size;
 
     @Column(name = "FILE_CATEGORY", nullable = false)
     @Enumerated(EnumType.STRING)
@@ -40,12 +40,8 @@ public class FileEntity {
 
     // TODO (if possible) store userComments as HTMLs or something
     // Micro-service approach: cut the links between loosely coupled entities
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "file")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "file", cascade = CascadeType.ALL)
     private List<CommentEntity> userComments;
-
-    // TODO validate file's path
-    @Column(name = "PATH")
-    private String path;
 
     // TODO add user's id or user as an object?
 
@@ -93,11 +89,11 @@ public class FileEntity {
         this.fileName = fileName;
     }
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 
-    public void setSize(int size) {
+    public void setSize(long size) {
         this.size = size;
     }
 
@@ -141,14 +137,6 @@ public class FileEntity {
         this.userComments = userComments;
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
     public boolean isDeleted() {
         return deleted;
     }
@@ -166,8 +154,7 @@ public class FileEntity {
                 ", fileName='" + fileName + '\'' +
                 ", size=" + size +
                 ", category=" + category +
-                ", userComments=" + userComments +
-                ", path='" + path + '\'' +
+                ", userComments=LAZY" +
                 ", deleted=" + deleted +
                 ", createDate=" + createDate +
                 ", modifiedDate=" + modifiedDate +

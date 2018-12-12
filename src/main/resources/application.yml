@@ -15,14 +15,20 @@ spring:
 
 
   jackson.serialization.WRITE_DATES_AS_TIMESTAMPS: false
+
 # spring.servlet.multipart.max-file-size is set to 20MB, meaning total file size cannot exceed 20MB
-spring.servlet.multipart.max-file-size: 20MB
+#spring.servlet.multipart.max-file-size: 5KB
 # spring.servlet.multipart.max-request-size: is set to 128KB, meaning total request size for a
 # multipart/form-data cannot exceed 128KB
-spring.servlet.multipart.max-request-size: 128KB
+#spring.servlet.multipart.max-request-size: 1MB
+
 # By default, Spring features a MultipartResolver that we'll need to disable to use this library.
 # Otherwise, it'll read the content of the request before it reaches our Controller.
-spring.http.multipart.enabled: false
+#spring.http.multipart.enabled: false # <= only set this to FALSE when you don't want to use swagger
+spring.http.multipart.enabled: true # This allows Swagger generated code to work
+spring.http.multipart.max-file-size: 20MB
+spring.http.multipart.max-request-size: 25MB
+spring.http.multipart.location: /
 
 # Custom properties
-storage.location: webapp//upload//
+storage.location: src/main/webapp/upload  # The relative path has its root placed at the project folder.

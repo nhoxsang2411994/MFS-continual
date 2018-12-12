@@ -12,20 +12,20 @@ tags:
 schemes:
 - https
 - http
-consumes:
-- application/octet-stream
-- application/json
-- application/pdf
-- application/zip
-- application/vnd.openxmlformats-officedocument.wordprocessingml.document
-- application/vnd.oasis.opendocument.text
-- image/png
-- image/gif
-- image/jpeg
-- video/mpeg
-- audio/mpeg
-- audio/ogg
-- text/plain
+#consumes:
+#- application/octet-stream
+#- application/json
+#- application/pdf
+#- application/zip
+#- application/vnd.openxmlformats-officedocument.wordprocessingml.document
+#- application/vnd.oasis.opendocument.text
+#- image/png
+#- image/gif
+#- image/jpeg
+#- video/mpeg
+#- audio/mpeg
+#- audio/ogg
+#- text/plain
 produces:
 - application/octet-stream
 - application/json
@@ -41,7 +41,7 @@ produces:
 - audio/ogg
 - text/plain
 paths:
-  '/v1/users/{userId}/files/':
+  '/v1/users/{userId}/accountlevel/{maxUpSize}/files/':
     post:
       tags:
       - Registered User
@@ -50,6 +50,19 @@ paths:
       operationId: upFile
       consumes:
       - multipart/form-data
+      - application/octet-stream
+      - application/json
+      - application/pdf
+      - application/zip
+      - application/vnd.openxmlformats-officedocument.wordprocessingml.document
+      - application/vnd.oasis.opendocument.text
+      - image/png
+      - image/gif
+      - image/jpeg
+      - video/mpeg
+      - audio/mpeg
+      - audio/ogg
+      - text/plain
       produces:
       - application/json
       parameters:
@@ -58,6 +71,12 @@ paths:
         type: file
         required: true
         description: The file to upload.
+      - in: path
+        name: maxUpSize
+        required: true
+        description: Maximum upload size (in MB).
+        type: integer
+        format: int32
       - in: path
         name: userId
         type: string
@@ -74,7 +93,7 @@ paths:
           description: No files with the provided file name found
         '500':
           description: Internal Server Error
-  '/v1/users/{userId}/files/{fileId}':
+  '/v1/users/{userId}/username/{username}/files/{fileId}':
     post:
       tags:
       - Registered User
@@ -82,7 +101,7 @@ paths:
       description: Allow users to post a comment on a file.
       operationId: postComment
       consumes:
-      - text/plain; charset=utf-8
+      - application/json
       parameters:
       - in: path
         name: userId
@@ -95,6 +114,11 @@ paths:
         description: The file id.
         type: string
         format: uuid
+        required: true
+      - in: path
+        name: username
+        description: The commentator's user name
+        type: string
         required: true
       - in: body
         name: comment
@@ -149,11 +173,11 @@ paths:
         required: true
         type: string
         enum:
-        - ARCHIVE
-        - AUDIO
-        - IMAGE
-        - TEXT
-        - VIDEO
+        - achieve
+        - audio
+        - image
+        - text
+        - video
         - UNCLASSIFIED
       produces:
       - application/json
@@ -352,6 +376,11 @@ definitions:
   Comment:
     type: object
     properties:
+      commentatorId:
+        type: string
+        format: uuid
+        description: commentator id
+        readOnly: true
       username:
         type: string
         minLength: 3
@@ -379,11 +408,11 @@ definitions:
   Category:
     type: string
     enum:
-    - ARCHIVE
-    - AUDIO
-    - IMAGE
-    - TEXT
-    - VIDEO
+    - achieve
+    - audio
+    - image
+    - text
+    - video
     - UNCLASSIFIED
     description: >
       File categories:
@@ -407,23 +436,7 @@ definitions:
         maxLength: 15
         pattern: "^[\\w\\- ]+$"
         description: The name that will be used to display on the website.
+        readOnly: true
     required:
-    - username
     - email
     - accountLevel
-  # AccountLevel:
-  #   type: object
-  #   properties:
-  #     accountLevelId:
-  #       type: string
-  #       format: uuid
-  #       readOnly: true
-  #     accountLevelName:
-  #       description: >
-  #         * BRONZE - Can upload 5 MB per file. Can download up to 50 MB per day.
-  #         * SILVER - Can upload 10 MB per file. Can download 70 MB per day.
-  #         * GOLD - Can upload 20 MB per file. No limits.
-  #       enum:
-  #       - BRONZE
-  #       - SILVER
-  #       - GOLD

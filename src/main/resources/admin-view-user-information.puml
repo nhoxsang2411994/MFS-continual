@@ -5,8 +5,8 @@ end title
 
 Swagger -> V1Delegate: View information request
 V1Delegate -> UserService: View information request
-UserService -> UserRepository: Verify request (userId)
-UserRepository -> UserDatabase: Query (userId)
+UserService -> UserRepository: Verify request (commentatorId)
+UserRepository -> UserDatabase: Query (commentatorId)
 UserDatabase --> UserRepository: Result
 UserRepository --> UserService: Result
 

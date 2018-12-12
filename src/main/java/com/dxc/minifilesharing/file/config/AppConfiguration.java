@@ -66,11 +66,5 @@ class AppConfiguration {
 		};
 	}
 
-    /**
-     * For file uploading
-     * @return
-     */
-    @Bean
-    public StandardServletMultipartResolver multipartResolver() {
-        return new StandardServletMultipartResolver();
-    }}
+
+}
