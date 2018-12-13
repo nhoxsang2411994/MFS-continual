@@ -12,7 +12,8 @@ public enum FileServiceError {
     INVALID_UPLOADER(2002, HttpStatus.BAD_REQUEST),
     INVALID_FILE_ID(2002, HttpStatus.BAD_REQUEST),
     INVALID_COMMENT(2002, HttpStatus.BAD_REQUEST),
-    INVALID_COMMENTATOR(2002, HttpStatus.BAD_REQUEST);
+    INVALID_COMMENTATOR(2002, HttpStatus.BAD_REQUEST),
+    INVALID_SEARCH_TERM(2002, HttpStatus.BAD_REQUEST);
 
     private final int code;
     private final HttpStatus httpStatus;

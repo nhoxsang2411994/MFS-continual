@@ -3,6 +3,7 @@ package com.dxc.minifilesharing.file.delegate;
 import com.dxc.minifilesharing.file.api.V1ApiDelegate;
 import com.dxc.minifilesharing.file.entity.Category;
 import com.dxc.minifilesharing.file.entity.Comment;
+import com.dxc.minifilesharing.file.entity.UserFile;
 import com.dxc.minifilesharing.file.service.FileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,19 +25,26 @@ public class V1ApiDelegateImp implements V1ApiDelegate {
 
 
     @Override
+    public ResponseEntity<byte[]> downloadFile(Integer maxDownloadSize, UUID fileId) {
+        return null;
+    }
+
+    @Override
     public ResponseEntity<UUID> postComment(UUID userId, UUID fileId, String username, Comment comment) {
         return ResponseEntity.ok(fileService.postComment(userId, fileId, username, comment));
     }
 
     @Override
-    public ResponseEntity<File> readFileInfo(UUID fileId) {
+    public ResponseEntity<UserFile> readFileInfo(UUID fileId) {
         return null;
     }
 
+
     @Override
-    public ResponseEntity<List<byte[]>> readFilesByCategory(String category) {
-        return null;
+    public ResponseEntity<List<UserFile>> readFilesByCategory(String category) {
+        return ResponseEntity.ok(fileService.readFilesByCategory(category));
     }
+
 
     @Override
     public ResponseEntity<List<byte[]>> readFilesByFileNames(String fileName) {

@@ -1,6 +1,6 @@
 package com.dxc.minifilesharing.file.common;
 
-public enum FileCategory {
+public enum CommonFileCategory {
     audio("mp3", "ogg", "flac", "wav"),
     image("png", "jpeg", "gif", "jpg"),
     text("txt", "doc", "docx", "json", "pdf"),
@@ -10,7 +10,7 @@ public enum FileCategory {
 
     private final String[] extensions;
 
-    FileCategory(String... extensions) {
+    CommonFileCategory(String... extensions) {
         this.extensions = new String[extensions.length];
         for (int i = 0, l = extensions.length; i < l; i++) {
             this.extensions[i] = extensions[i];

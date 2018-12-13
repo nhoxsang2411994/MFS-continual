@@ -1,6 +1,6 @@
 package com.dxc.minifilesharing.file.entity;
 
-import com.dxc.minifilesharing.file.common.FileCategory;
+import com.dxc.minifilesharing.file.common.CommonFileCategory;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
@@ -8,7 +8,12 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "FILE")
+@Table(name = "FILE", indexes = {
+        @Index(name = "IDX_FILE_NAME", columnList = "FILE_NAME"),
+        @Index(name = "IDX_SIZE", columnList = "SIZE"),
+        @Index(name = "IDX_FILE_CATEGORY", columnList = "FILE_CATEGORY"),
+        @Index(name = "IDX_UPLOADER_ID", columnList = "UPLOADER_ID")
+})
 public class FileEntity {
 
     //TODO Indexing category, uploader, fileName, size
@@ -36,7 +41,7 @@ public class FileEntity {
 
     @Column(name = "FILE_CATEGORY", nullable = false)
     @Enumerated(EnumType.STRING)
-    private FileCategory category;
+    private CommonFileCategory category;
 
     // TODO (if possible) store userComments as HTMLs or something
     // Micro-service approach: cut the links between loosely coupled entities
@@ -97,11 +102,11 @@ public class FileEntity {
         this.size = size;
     }
 
-    public FileCategory getCategory() {
+    public CommonFileCategory getCategory() {
         return category;
     }
 
-    public void setCategory(FileCategory category) {
+    public void setCategory(CommonFileCategory category) {
         this.category = category;
     }
 

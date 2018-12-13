@@ -40,6 +40,98 @@ produces:
 - audio/mpeg
 - audio/ogg
 - text/plain
+definitions:
+  UserFile:
+    type: object
+    properties:
+      fileId:
+        type: string
+        format: uuid
+        readOnly: true
+        description: The file's id.
+      fileName:
+        type: string
+        minLength: 1
+        maxLength: 100
+        pattern: "^[\\w\\-. ]+$"
+        description: The name of the file, e.g., 'text.txt'.
+      size:
+        type: integer
+        # nullable: false # not supported in Swagger 2.0
+        # minimum: 1
+        # maximum: 20480
+        format: int64
+        readOnly: true
+        description: The file's size, in bytes.
+      # uploadedPath:
+      #   type: string
+      #   description: The location where the file is stored.
+      fileCategory:
+        $ref: '#/definitions/Category'
+      uploaderId:
+        type: string
+        format: uuid
+        readOnly: true
+        description: The id of this file's uploader.
+    required:
+    - fileName
+  Comment:
+    type: object
+    properties:
+      commentatorId:
+        type: string
+        format: uuid
+        description: commentator id
+        readOnly: true
+      username:
+        type: string
+        minLength: 3
+        maxLength: 15
+        pattern: "^[\\w\\- ]+$"
+        description: The name that will be used to display on the website.
+        readOnly: true
+      comment:
+        type: string
+        minLength: 20
+        maxLength: 200
+        description: the comment of user.
+    required:
+    - comment
+  Category:
+    type: string
+    enum: &CATEGORY
+    - audio
+    - image
+    - text
+    - video
+    - application
+    - unclassified
+    description: >
+      File categories:
+       * application - Archives, e.g., zip, rar.
+       * audio - Audio files, e.g., mp3, ogg, flac, wav.
+       * image - Images, e.g., png, jpeg, gif, jpg.
+       * text - Text files, e.g., txt, doc, docx, json, pdf, epub.
+       * video - Videos, e.g., mp4, wmv, mov, avi, flv.
+       * unclassified - unclassified files.
+  # User:
+  #   type: object
+  #   properties:
+  #     userId:
+  #       type: string
+  #       format: uuid
+  #       readOnly: true
+  #       description: The id of the user.
+  #     username:
+  #       type: string
+  #       minLength: 3
+  #       maxLength: 15
+  #       pattern: "^[\\w\\- ]+$"
+  #       description: The name that will be used to display on the website.
+  #       readOnly: true
+  #   required:
+  #   - email
+  #   - accountLevel
 paths:
   '/v1/users/{userId}/accountlevel/{maxUpSize}/files/':
     post:
@@ -91,6 +183,38 @@ paths:
             format: uuid
         '404':
           description: No files with the provided file name found
+        '500':
+          description: Internal Server Error
+  '/v1/users/accountlevel/{maxDownloadSize}/files/{fileId}':
+    get:
+      tags:
+      - Registered User
+      summary: Download a file
+      description: Allow users to download a file.
+      operationId: downloadFile
+      produces:
+      - application/octet-stream
+      parameters:
+      - in: path
+        name: maxDownloadSize
+        type: integer
+        format: int32
+        description: Maximum download size (in MB.)
+        required: true
+      - in: path
+        name: fileId
+        type: string
+        format: uuid
+        description: The id of the file needs to be downloaded.
+        required: true
+      responses:
+        '200':
+          description:  Download link is ready.
+          schema:
+            type: string
+            format: binary
+        '404':
+          description: No files with the provided ids found.
         '500':
           description: Internal Server Error
   '/v1/users/{userId}/username/{username}/files/{fileId}':
@@ -172,13 +296,8 @@ paths:
         name: category
         required: true
         type: string
-        enum:
-        - achieve
-        - audio
-        - image
-        - text
-        - video
-        - UNCLASSIFIED
+        enum: *CATEGORY
+      #   enum: [application, text, video, image, audio, unclassified]
       produces:
       - application/json
       responses:
@@ -187,8 +306,7 @@ paths:
           schema:
             type: array
             items:
-              type: string
-              format: binary
+              $ref: '#/definitions/UserFile'
         '404':
           description: No files with the provided category found
         '500':
@@ -330,113 +448,8 @@ paths:
         '200':
           description:  Retrieved information successfully.
           schema:
-            $ref: "#/definitions/File"
+            $ref: "#/definitions/UserFile"
         '404':
           description: No files with given size found
         '500':
           description: Internal Server Error
-definitions:
-  File:
-    type: object
-    properties:
-      fileId:
-        type: string
-        format: uuid
-        readOnly: true
-        description: The file's id.
-      fileName:
-        type: string
-        minLength: 1
-        maxLength: 100
-        pattern: "^[\\w\\-. ]+$"
-        description: The name of the file, e.g., 'text.txt'.
-      size:
-        type: integer
-        # nullable: false # not supported in Swagger 2.0
-        # minimum: 1
-        # maximum: 20480
-        format: int32
-        readOnly: true
-        description: The file's size, in kilobytes.
-      # uploadedPath:
-      #   type: string
-      #   description: The location where the file is stored.
-      fileCategory:
-        $ref: '#/definitions/FileCategory'
-      userComments:
-        type: array
-        description: Many users can make comments on a file. Can be obmitted.
-        items:
-          $ref: '#/definitions/Comment'
-      uploader:
-        $ref: '#/definitions/User'
-    required:
-    - fileName
-    - uploader
-  Comment:
-    type: object
-    properties:
-      commentatorId:
-        type: string
-        format: uuid
-        description: commentator id
-        readOnly: true
-      username:
-        type: string
-        minLength: 3
-        maxLength: 15
-        pattern: "^[\\w\\- ]+$"
-        description: The name that will be used to display on the website.
-        readOnly: true
-      comment:
-        type: string
-        minLength: 20
-        maxLength: 200
-        description: the comment of user.
-    required:
-    - comment
-  FileCategory:
-    type: object
-    properties:
-      id:
-        type: string
-        format: uuid
-        readOnly: true
-        description: The id of categories.
-      name:
-        $ref: '#/definitions/Category'
-  Category:
-    type: string
-    enum:
-    - achieve
-    - audio
-    - image
-    - text
-    - video
-    - UNCLASSIFIED
-    description: >
-      File categories:
-       * ARCHIVE - Archives, e.g., zip, rar.
-       * AUDIO - Audio files, e.g., mp3, ogg, flac, wav.
-       * IMAGE - Images, e.g., png, jpeg, gif, jpg.
-       * TEXT - Text files, e.g., txt, doc, docx, json, pdf, epub.
-       * VIDEO - Videos, e.g., mp4, wmv, mov, avi, flv.
-       * UNCLASSIFIED - unclassified files.
-  User:
-    type: object
-    properties:
-      userId:
-        type: string
-        format: uuid
-        readOnly: true
-        description: The id of the user.
-      username:
-        type: string
-        minLength: 3
-        maxLength: 15
-        pattern: "^[\\w\\- ]+$"
-        description: The name that will be used to display on the website.
-        readOnly: true
-    required:
-    - email
-    - accountLevel

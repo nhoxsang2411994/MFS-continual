@@ -1,22 +1,22 @@
 package com.dxc.minifilesharing.file.service;
 
-import com.dxc.minifilesharing.file.common.FileCategory;
+import com.dxc.minifilesharing.file.common.CommonFileCategory;
 import com.dxc.minifilesharing.file.common.FileServiceError;
 import com.dxc.minifilesharing.file.config.StorageProperties;
-import com.dxc.minifilesharing.file.entity.Comment;
-import com.dxc.minifilesharing.file.entity.CommentEntity;
-import com.dxc.minifilesharing.file.entity.FileEntity;
+import com.dxc.minifilesharing.file.entity.*;
 import com.dxc.minifilesharing.file.exception.FileServiceException;
 import com.dxc.minifilesharing.file.repository.FileRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.dxc.minifilesharing.file.common.FileServiceError.*;
@@ -41,11 +42,13 @@ public class FileService {
     private static final String AUDIO = "audio";
     private static final String TEXT = "text";
 
-    @Autowired
+    private static final int NO_OF_RESULTS = 3;
+
     private FileRepository fileRepository;
 
     @Autowired
-    public FileService(StorageProperties properties) {
+    public FileService(StorageProperties properties, FileRepository fileRepository) {
+        this.fileRepository = fileRepository;
         this.rootLocation = Paths.get(properties.getLocation());
     }
 
@@ -82,7 +85,7 @@ public class FileService {
         boolean limitExceeded = maxUpSize*1024*1024 < file.getSize();
         if (limitExceeded) {
             throw new FileServiceException(FileServiceError.UPLOAD_FAILED, "The file is too big." +
-                    " Maximum upload size is: " + maxUpSize);
+                    " Maximum upload size is: " + maxUpSize + "MB.");
         }
         fileEntity.setSize(file.getSize());
 
@@ -113,8 +116,16 @@ public class FileService {
         return UUID.fromString(fileEntity.getFileId());
     }
 
-    private FileCategory classifyContentType(Path userDir, String filename) throws IOException {
-        FileCategory fileCategory;
+    /**
+     * Classifies the contentType of the uploaded file.
+     * <p>
+     * @param userDir
+     * @param filename
+     * @return CommonFileCategory
+     * @throws IOException
+     */
+    private CommonFileCategory classifyContentType(Path userDir, String filename) throws IOException {
+        CommonFileCategory commonFileCategory;
         Path uploadedFile = Paths.get(userDir.toString() + filename);
         String contentType = Files.probeContentType(uploadedFile);
         String[] rs;
@@ -130,33 +141,39 @@ public class FileService {
             rs[0] = UNCLASSIFIED;
         }
 
-        switch (rs[0]) {
+        return string2FileCategory(rs[0]);
+    }//end classifyContentType
+
+    private CommonFileCategory string2FileCategory(String r) {
+        CommonFileCategory commonFileCategory;
+        switch (r) {
             case APPLICATION: {
-                fileCategory = FileCategory.application;
+                commonFileCategory = CommonFileCategory.application;
                 break;
             }
             case AUDIO: {
-                fileCategory = FileCategory.audio;
+                commonFileCategory = CommonFileCategory.audio;
                 break;
             }
             case VIDEO: {
-                fileCategory = FileCategory.video;
+                commonFileCategory = CommonFileCategory.video;
                 break;
             }
             case IMAGE: {
-                fileCategory = FileCategory.image;
+                LOGGER.info("OKE");
+                commonFileCategory = CommonFileCategory.image;
                 break;
             }
             case TEXT: {
-                fileCategory = FileCategory.text;
+                commonFileCategory = CommonFileCategory.text;
                 break;
             }
             default: {
-                fileCategory = FileCategory.unclassified;
+                commonFileCategory = CommonFileCategory.unclassified;
                 break;
             }
         }//end switch
-        return  fileCategory;
+        return commonFileCategory;
     }
 
     public UUID postComment(UUID userId, UUID fileId, String username, Comment comment) {
@@ -187,5 +204,69 @@ public class FileService {
         fileEntity.getUserComments().add(commentEntity);
         fileRepository.flush();
         return UUID.fromString(commentEntity.getCommentId());
+    }//end postComment
+
+    public List<UserFile> readFilesByCategory(String category) {
+        if (null == category || category.isEmpty()) {
+            throw new FileServiceException(INVALID_SEARCH_TERM, "The input category is invalid.");
+        }
+
+        Sort sort = new Sort(new Sort.Order(Sort.Direction.ASC, "fileName"));
+        Pageable pageable = new PageRequest(0, NO_OF_RESULTS, sort);
+
+        String[] rs = category.split("");
+        category = "";
+        for (int i = 1, l = rs.length; i < rs.length - 1; i++) {
+            category = category.concat(rs[i]);
+        }
+
+        Page<FileEntity> page = fileRepository.findByFileCategory(string2FileCategory(category), pageable);
+
+        if (null == page || 0 >= page.getSize()) {
+            throw new FileServiceException(NOT_FOUND, "No result with the input category found: " + category);
+        }
+
+        List<UserFile> userFiles = new ArrayList<>();
+        for (FileEntity fileEntity : page.getContent()) {
+            userFiles.add(fileEntity2UserFile(fileEntity));
+        }
+
+        return userFiles;
+    }//end readFilesByCategory
+
+    private UserFile fileEntity2UserFile(FileEntity fileEntity) {
+        UserFile userFile = new UserFile();
+        userFile.setFileCategory(commonFileCategory2Category(fileEntity.getCategory()));
+        userFile.setFileId(UUID.fromString(fileEntity.getFileId()));
+        userFile.setFileName(fileEntity.getFileName());
+        userFile.setSize(fileEntity.getSize());
+        userFile.setUploaderId(UUID.fromString(fileEntity.getUploaderId()));
+        return userFile;
+    }
+
+    private Category commonFileCategory2Category(CommonFileCategory category) {
+        if (null == category) {
+            throw new FileServiceException(UNEXPECTED, "The input category is invalid.");
+        }
+        switch (category) {
+            case text:{
+                return Category.TEXT;
+            }
+            case audio:{
+                return Category.AUDIO;
+            }
+            case application:{
+                return Category.APPLICATION;
+            }
+            case image: {
+                return Category.IMAGE;
+            }
+            case video: {
+                return Category.VIDEO;
+            }
+            default:{
+                return Category.UNCLASSIFIED;
+            }
+        }
     }
 }
