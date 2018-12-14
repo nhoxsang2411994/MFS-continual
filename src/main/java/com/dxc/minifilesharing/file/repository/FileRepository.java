@@ -13,6 +13,6 @@ public interface FileRepository extends JpaRepository<FileEntity, Long> {
     FileEntity findByFileId(String toString);
 
     @Query("SELECT f FROM FileEntity f " +
-            "WHERE f.category = :commonFileCategory")
+            "WHERE f.category = :commonFileCategory AND f.deleted = false")
     Page<FileEntity> findByFileCategory(@Param("commonFileCategory") CommonFileCategory commonFileCategory, Pageable pageable);
 }

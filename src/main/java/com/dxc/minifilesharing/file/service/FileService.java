@@ -6,6 +6,9 @@ import com.dxc.minifilesharing.file.config.StorageProperties;
 import com.dxc.minifilesharing.file.entity.*;
 import com.dxc.minifilesharing.file.exception.FileServiceException;
 import com.dxc.minifilesharing.file.repository.FileRepository;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.eclipse.jgit.lib.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -52,6 +57,27 @@ public class FileService {
         this.rootLocation = Paths.get(properties.getLocation());
     }
 
+    /*@Transactional
+    public UUID upFileToGit(MultipartFile file, UUID userId, int maxUpSize) throws IOException
+            , IllegalStateException, GitAPIException {
+        FileEntity fileEntity = new FileEntity();
+        // validate parameters
+        if (null == userId) {
+            throw new FileServiceException(INVALID_UPLOADER, "User id is null");
+        }
+        // set uploader id
+        fileEntity.setUploaderId(userId.toString());
+
+        File localPath = File.createTempFile("MFSTestRepository", "");
+
+        // Access an existing repository
+        try (Git git = Git.open(new File(rootLocation.toString()+""))) {
+            Repository repository = git.getRepository();
+        }
+        return null;
+    }*/
+
+    @Transactional
     public UUID upFile(MultipartFile file, UUID userId, int maxUpSize) {
         LOGGER.info(rootLocation.toAbsolutePath().toString());
         FileEntity fileEntity = new FileEntity();
@@ -97,6 +123,7 @@ public class FileService {
         // set file name
         fileEntity.setFileName(filename);
 
+        //TODO check if the file has already existed. If it does, throw exception.
         try (InputStream inputStream = file.getInputStream()) {
             Files.copy(inputStream, userDir.resolve(filename),
                     StandardCopyOption.REPLACE_EXISTING);
@@ -114,7 +141,9 @@ public class FileService {
         fileEntity.setUserComments(new ArrayList<>());
         fileRepository.saveAndFlush(fileEntity);
         return UUID.fromString(fileEntity.getFileId());
-    }
+    }//end upFile
+
+
 
     /**
      * Classifies the contentType of the uploaded file.
@@ -160,7 +189,6 @@ public class FileService {
                 break;
             }
             case IMAGE: {
-                LOGGER.info("OKE");
                 commonFileCategory = CommonFileCategory.image;
                 break;
             }
@@ -176,6 +204,7 @@ public class FileService {
         return commonFileCategory;
     }
 
+    @Transactional
     public UUID postComment(UUID userId, UUID fileId, String username, Comment comment) {
         if (userId == null) {
             throw new FileServiceException(INVALID_UPLOADER, "userId is null");
@@ -206,6 +235,7 @@ public class FileService {
         return UUID.fromString(commentEntity.getCommentId());
     }//end postComment
 
+    @Transactional
     public List<UserFile> readFilesByCategory(String category) {
         if (null == category || category.isEmpty()) {
             throw new FileServiceException(INVALID_SEARCH_TERM, "The input category is invalid.");
